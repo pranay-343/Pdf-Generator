@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html charset="utf-8">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>GanttElastic demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <script src="assets/GanttElastic.umd.js"></script>
+    <script src="https://unpkg.com/gantt-elastic-header@0.1.11/dist/Header.umd.js"></script>
+    <!--
+  <script src="../dist/GanttElastic.umd.js"></script>
+  -->
+ <!-- Added BY Sukhdev -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="assets/jspdf1.min.js"></script>
+  <script type="text/javascript" src="assets/html2canvas.js"></script>
+ <!-- Added BY Sukhdev -->
+
+<style type="text/css">
+  .hide{
+    display: none;
+  }
+</style>
+
+</head>
+
+  <body>
+    <div style="width:100%;height:100%">
+     <div id='custom_main_section'>
+       <!-- <h3>My custom header...</h3> -->
+        <div id="app">
+          <gantt-elastic :tasks="tasks" :options="options">
+            <gantt-elastic-header slot="header"></gantt-elastic-header>
+            <gantt-footer slot="footer"></gantt-footer>
+
+          </gantt-elastic>
+        </div>
+      </div>
+    </div>
+    <div id='custom_main_footer'>
+      <!-- <h1>Upcommming  footer for colors...</h1> -->
+    </div>
+
+
+<button id="exportButton" >Genrate PDF</button>
+<button  id="wait" class="hide">Please Wait...</button>
+
+  <script>
+      // override components - copy component from src directory change it to object or compile *.vue to *.js
+      // more info about components you can find here : https://vuejs.org/v2/guide/index.html
+      // You can change anything! You have full control of components templates, events, data ... and so on!
+      // GanttElastic.component.components.EgMain.components.TopHeader = CustomHeader;
+
+     var MaxScrollHeight = 690;  // for showing row and scrolling 
+
+      // just helper to get current dates
+      function getDate(hours) {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+        const currentDay = currentDate.getDate();
+        const timeStamp = new Date(`${currentYear}-${currentMonth}-${currentDay} 00:00:00`).getTime();
+        return new Date(timeStamp + hours * 60 * 60 * 1000).getTime();
+      }
+
+      const tasks = [
+        {
+          id: 1,
+          label: 'Make some noise',
+          user:
+            '<a href="https://www.google.com/search?q=John+Doe" target="_blank" style="color:#0077c0;">John Doe</a>',
+          start: getDate(-24 * 5),
+          duration: 5 * 24 * 60 * 60 * 1000,
+          progress: 85,
+          type: 'project'
+        },
+        {
+          id: 2,
+          label: 'With great power comes great responsibility',
+          user:
+            '<a href="https://www.google.com/search?q=Peter+Parker" target="_blank" style="color:#0077c0;">Peter Parker</a>',
+          parentId: 1,
+          start: getDate(-24 * 4),
+          duration: 4 * 24 * 60 * 60 * 1000,
+          progress: 50,
+          type: 'milestone',
+          style: {
+            base: {
+              fill: '#1EBC61',
+              stroke: '#0EAC51'
+            }
+            /*'tree-row-bar': {
+            fill: '#1EBC61',
+            stroke: '#0EAC51'
+          },
+          'tree-row-bar-polygon': {
+            stroke: '#0EAC51'
+          }*/
+          }
+        },
+        {
+          id: 3,
+          label: 'Courage is being scared to death, but saddling up anyway.',
+          user:
+            '<a href="https://www.google.com/search?q=John+Wayne" target="_blank" style="color:#0077c0;">John Wayne</a>',
+          parentId: 2,
+          start: getDate(-24 * 3),
+          duration: 2 * 24 * 60 * 60 * 1000,
+          progress: 100,
+          type: 'task'
+        },
+        {
+          id: 4,
+          label: 'Put that toy AWAY!',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 2 * 24 * 60 * 60 * 1000,
+          progress: 50,
+          type: 'task',
+          dependentOn: [3]
+        },
+        {
+          id: 5,
+          label: 'One billion, gajillion, fafillion... shabadylu...mil...shabady......uh, Yen.',
+          user:
+            '<a href="https://www.google.com/search?q=Austin+Powers" target="_blank" style="color:#0077c0;">Austin Powers</a>',
+          parentId: 4,
+          start: getDate(0),
+          duration: 2 * 24 * 60 * 60 * 1000,
+          progress: 10,
+          type: 'milestone',
+          style: {
+            base: {
+              fill: '#0287D0',
+              stroke: '#0077C0'
+            }
+          }
+        },
+        {
+          id: 6,
+          label: 'Butch Mario and the Luigi Kid',
+          user:
+            '<a href="https://www.google.com/search?q=Mario+Bros" target="_blank" style="color:#0077c0;">Mario Bros</a>',
+          parentId: 5,
+          start: getDate(24),
+          duration: 1 * 24 * 60 * 60 * 1000,
+          progress: 50,
+          type: 'task',
+          style: {
+            base: {
+              fill: '#8E44AD',
+              stroke: '#7E349D'
+            }
+          }
+        },
+        {
+          id: 7,
+          label: 'Devon, the old man wanted me, it was his dying request',
+          user:
+            '<a href="https://www.google.com/search?q=Knight+Rider" target="_blank" style="color:#0077c0;">Knight Rider</a>',
+          parentId: 2,
+          dependentOn: [6],
+          start: getDate(24 * 2),
+          duration: 4 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task'
+        },
+        {
+          id: 8,
+          label: 'Hey, Baby! Anybody ever tell you I have beautiful eyes?',
+          user:
+            '<a href="https://www.google.com/search?q=Johhny+Bravo" target="_blank" style="color:#0077c0;">Johhny Bravo</a>',
+          parentId: 7,
+          dependentOn: [7],
+          start: getDate(24 * 3),
+          duration: 1 * 24 * 60 * 60 * 1000,
+          progress: 0,
+          type: 'task'
+        },
+        {
+          id: 9,
+          label: 'This better be important, woman. You are interrupting my very delicate calculations.',
+          user:
+            '<a href="https://www.google.com/search?q=Dexter\'s+Laboratory" target="_blank" style="color:#0077c0;">Dexter\'s Laboratory</a>',
+          parentId: 8,
+          dependentOn: [8, 7],
+          start: getDate(24 * 4),
+          duration: 4 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          style: {
+            base: {
+              fill: '#8E44AD',
+              stroke: '#7E349D'
+            }
+            /*'tree-row-bar-polygon': {
+            stroke: '#7E349D'
+          },
+          'tree-row-bar': {
+            fill: '#8E44AD',
+            stroke: '#7E349D'
+          }*/
+          }
+        },
+        {
+          id: 10,
+          label: 'current task',
+          user:
+            '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
+          start: getDate(24 * 5),
+          duration: 24 * 60 * 60 * 1000,
+          progress: 0,
+          type: 'task'
+        },
+         {
+          id: 11,
+          label: 'Put that toy AWAY! again ',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-14 * 2),
+          duration: 5 * 24 * 60 * 60 * 1000,
+          progress: 50,
+          type: 'task',
+          dependentOn: [3]
+        },
+         {
+          id: 12,
+          label: 'Put that toy AWAY! again agian',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-4 * 2),
+          duration: 20 * 24 * 60 * 60 * 1000,
+          progress: 80,
+          type: 'task',
+          dependentOn: [3]
+        },
+         {
+          id: 13,
+          label: 'Put that toy AWAY! again-3',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-12 * 2),
+          duration: 20 * 24 * 60 * 60 * 1000,
+          progress: 70,
+          type: 'task',
+          dependentOn: [3]
+        },
+         {
+          id: 14,
+          label: 'Put that toy AWAY! again-4',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+        {
+          id: 15,
+          label: 'Put that toy AWAY! again-4',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+        {
+          id: 16,
+          label: 'Put that toy AWAY! again-4',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+        {
+          id: 17,
+          label: 'Put that toy AWAY! again-4',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+       
+    {
+          id: 18,
+          label: 'Put that toy AWAY! again-18',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 19,
+          label: 'Put that toy AWAY! again-19',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 20,
+          label: 'Put that toy AWAY! again-20',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 21,
+          label: 'Put that toy AWAY! again-21',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 22,
+          label: 'Put that toy AWAY! again-22',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 23,
+          label: 'Put that toy AWAY! again-23',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 24,
+          label: 'Put that toy AWAY! again-24',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 25,
+          label: 'Put that toy AWAY! again-25',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 26,
+          label: 'Put that toy AWAY! again-26',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 27,
+          label: 'Put that toy AWAY! again-27',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 28,
+          label: 'Put that toy AWAY! again-28',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 29,
+          label: 'Put that toy AWAY! again-29',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        },
+    {
+          id: 30,
+          label: 'Put that toy AWAY! again-30',
+          user:
+            '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
+          start: getDate(-24 * 2),
+          duration: 21 * 24 * 60 * 60 * 1000,
+          progress: 20,
+          type: 'task',
+          dependentOn: [3]
+        }
+      ];
+
+      const options = {
+        title: {
+          label: 'Your project title as html (link or whatever...)',
+          html: false
+        },
+        maxRows: 100,
+        maxHeight: MaxScrollHeight,
+        taskList: {
+          columns: [
+            {
+              id: 1,
+              label: 'ID',
+              value: 'id',
+              width: 40
+            },
+            {
+              id: 2,
+              label: 'Description',
+              value: 'label',
+              width: 200,
+              expander: true
+            },
+            {
+              id: 3,
+              label: 'Assigned to',
+              value: 'user',
+              width: 130,
+              html: true
+            },
+            {
+              id: 3,
+              label: 'Start',
+              value: task => dayjs(task.start).format('YYYY-MM-DD'),
+              width: 78
+            },
+            {
+              id: 4,
+              label: 'Type',
+              value: 'type',
+              width: 68
+            },
+            {
+              id: 5,
+              label: '%',
+              value: 'progress',
+              width: 35,
+              style: {
+                'task-list-header-label': {
+                  'text-align': 'center',
+                  width: '100%'
+                },
+                'task-list-item-value-container': {
+                  'text-align': 'center'
+                }
+              }
+            }
+          ]
+        },
+        locale: {
+          code: 'en',
+          Now: 'Now',
+          'X-Scale': 'Zoom-X',
+          'Y-Scale': 'Zoom-Y',
+          'Task list width': 'Task list',
+          'Before/After': 'Expand',
+          'Display task list': 'Task list'
+        }
+        /*locale:{
+        name: 'pl', // name String
+        weekdays: 'Poniedziałek_Wtorek_Środa_Czwartek_Piątek_Sobota_Niedziela'.split('_'), // weekdays Array
+        weekdaysShort: 'Pon_Wto_Śro_Czw_Pią_Sob_Nie'.split('_'), // OPTIONAL, short weekdays Array, use first three letters if not provided
+        weekdaysMin: 'Pn_Wt_Śr_Cz_Pt_So_Ni'.split('_'), // OPTIONAL, min weekdays Array, use first two letters if not provided
+        months: 'Styczeń_Luty_Marzec_Kwiecień_Maj_Czerwiec_Lipiec_Sierpień_Wrzesień_Październik_Listopad_Grudzień'.split('_'), // months Array
+        monthsShort: 'Sty_Lut_Mar_Kwi_Maj_Cze_Lip_Sie_Wrz_Paź_Lis_Gru'.split('_'), // OPTIONAL, short months Array, use first three letters if not provided
+        ordinal: n => `${n}`, // ordinal Function (number) => return number + output
+        relativeTime: { // relative time format strings, keep %s %d as the same
+          future: 'za %s', // e.g. in 2 hours, %s been replaced with 2hours
+          past: '%s temu',
+          s: 'kilka sekund',
+          m: 'minutę',
+          mm: '%d minut',
+          h: 'godzinę',
+          hh: '%d godzin', // e.g. 2 hours, %d been replaced with 2
+          d: 'dzień',
+          dd: '%d dni',
+          M: 'miesiąc',
+          MM: '%d miesięcy',
+          y: 'rok',
+          yy: '%d lat'
+        }
+      }*/
+      };
+
+      new Vue({
+        components: {
+          'gantt-elastic-header': Header,
+          'gantt-elastic': GanttElastic,
+          'gantt-footer': {
+        template: `<span class="gantt-elastic__footer"><h3>this is a ganttchart footer </h3> </span>`
+      }
+        },
+        data: {
+          tasks,
+          options,
+          dynamicStyle: {}
+        }
+      }).$mount('#app');
+    </script>
+
+  <!-- for genrating PDF by sukhdev pawar -->
+  <script type="text/javascript">
+
+    var doc = new jsPDF('l', 'pt', [11*72,17*72]); // l=landscap,p =portrait pdf
+    var pdfWidth    = doc.internal.pageSize.width;
+    var pdfHeight   = doc.internal.pageSize.height;
+    var h1=30;
+
+
+    var AllImage = [];      // hold all immages 
+    var scrolled=0;         // horizental scroll
+    var verticalScroll = 0; // vertical  scroll
+    var Width=[]            // hold indisual image width
+    var VerticalScrollCount   = 0; // possible  vertical  scroll
+    var HorizenatalScrollCount= 0; // possible  horizental  scroll
+    var HorizentalCall=1; // count of calling
+    var VerticalCall=1;   // count of calling
+    var pageNo = 0;
+
+   
+    function Create()   // hold images with scrolling
+    {
+      url ='';
+      divID=(pageNo==0)?"#app .gantt-elastic__main-container-wrapper":"#app .gantt-elastic__main-container-wrapper";
+      html2canvas(document.querySelector(divID), { scrollX: 0, scrollY: -window.scrollY }
+      ).then(canvas => {
+          svgBlob = canvas.getContext("2d");
+          url = canvas.toDataURL(svgBlob)
+          AllImage.push(url)
+          Width.push(canvas.width)
+          ForHorizental();
+      });
+      pageNo++;
+    }
+
+    function Lastpage() // for header and footer in last page of pdf
+    {
+      var len =AllImage.length+1;
+      var header;
+      var headerWidth =0;
+      var headerHeight =0;
+      var footer;
+      var footerWidth  =0;
+      var footerHeight =0;
+      var y =30 // margin for y axis
+
+      doc.addPage();  // first add new page 
+
+    // create ganttchart Header 
+      html2canvas(document.querySelector("#app .gantt-elastic__header"), { scrollX: 0, scrollY: -window.scrollY }).then(canvas => {
+          svgBlob = canvas.getContext("2d");
+          header = canvas.toDataURL(svgBlob)
+          headerWidth =canvas.width;
+          headerHeight =canvas.height;
+          if(headerWidth>pdfWidth)
+          {
+             headerWidth =pdfWidth;
+          }
+          if(headerHeight>200)
+          {
+            headerHeight=200;
+          }  
+
+    // create ganttchart footer 
+            html2canvas(document.querySelector("#app .gantt-elastic__footer"), { scrollX: 0, scrollY: -window.scrollY }).then(canvas => {
+                svgBlob = canvas.getContext("2d");
+                footer = canvas.toDataURL(svgBlob)
+                footerWidth =canvas.width;
+                footerHeight =canvas.height;
+                if(footerWidth>pdfWidth)
+                {
+                   footerWidth =pdfWidth;
+                }
+                if(footerHeight>(pdfHeight-headerHeight))
+                {
+                  footerHeight=(pdfHeight-headerHeight);
+                }    
+
+                doc.text(20, 20, 'This is  my last page header');
+                doc.addImage(header, "JPEG", 5,y,headerWidth,headerHeight,"a"+15,"FAST");
+                doc.addImage(footer, "JPEG", 5,y+200,footerWidth,footerHeight,"a"+16,"FAST");
+                doc.text(10, 760, 'This is  my last page footer');
+                
+                doc.save("chart.pdf");    
+                Reset(); 
+            });
+
+      });
+
+    } 
+
+    function createPDF()  // for genrating pdf page 
+    {
+          var imgWidth = 0;
+          var imgHeight = 0; 
+
+          for(i=0;i<AllImage.length;i++)
+          {                
+            imageWidth  = Width[i];
+
+             if(imageWidth>pdfWidth)
+             {
+              imageWidth =pdfWidth;
+             }
+
+             if(i==0)
+             {
+               doc.text(20, 20, 'This is  my first page header');
+               doc.text(1050, 20, 'Screenshot - '+(i+1)+'/'+AllImage.length);
+             }
+
+             else if(i<(AllImage.length-1) && i>0)
+             {
+              doc.text(20, 20, 'This is  my second page header');
+              doc.text(1050, 20, 'Screenshot - '+(i+1)+'/'+AllImage.length);
+             }
+             else
+             {
+              doc.text(10, 20, 'Screenshot - '+(i+1)+'/'+AllImage.length);
+             }
+
+             // add images
+             doc.addImage(AllImage[i], "JPEG", 5,h1,imageWidth,690,"a"+i,"FAST");
+
+             if(i==0)
+             {
+              doc.text(10, 760, 'This is  my first page footer');
+             }
+             if(i<(AllImage.length-1) && i>0)
+             {
+              doc.text(10, 760, 'This is  my second page footer');
+             }
+
+            /// add page
+            if(i<(AllImage.length-1))
+            {
+             doc.addPage();
+            }
+          }
+          Lastpage();  // after add all screenshots  add ganttchart header footer on last page
+    }
+
+    $('#exportButton').click(function(){
+
+        // for look like processing
+          $("#wait").removeClass('hide');
+          $(this).addClass('hide');
+        // for look like processing end
+
+        // for get all possible vertical scrolling for looping 
+          self = $('.gantt-elastic__chart-scroll-container--vertical').scrollTop()
+          element =$('.gantt-elastic__chart-scroll-container--vertical')[0];
+          maxvertical  = element.scrollHeight - element.clientHeight;
+          VerticalScrollCount   = Math.ceil((maxvertical/280)+1);
+       
+
+       // for get all possible Horizental scrolling for looping
+         self = $('.gantt-elastic__chart-scroll-container--horizontal').scrollLeft()
+         element =$('.gantt-elastic__chart-scroll-container--horizontal')[0];
+         maxhorigental  = element.scrollWidth - element.clientWidth;
+
+        VerticalScrollCount   = Math.ceil((maxvertical/280)+1);
+        HorizenatalScrollCount   = Math.ceil((maxhorigental/700)+1);
+        
+        ForVertical();   // start scrolling
+    })
+   
+   function ForVertical() //vertical auto scroll
+   {
+     if(VerticalCall>VerticalScrollCount)
+     {
+      createPDF(); //Vertical and horizental scrolling over than start creating pdf
+     }
+     else
+     {
+      TakeScroll();  //scrolling
+     }
+   }
+
+   function ForHorizental() //horizental auto scroll
+   {
+      
+      if(HorizentalCall > HorizenatalScrollCount)
+      {
+       scrolled =0;
+       HorizentalCall = 1;
+       ForVertical();
+      }
+      else
+      {
+        TakeScroll(2)
+      }
+   }
+
+   function TakeScroll(type='1') // 1 =vertical,other = horizental 
+    {
+       if(type=='1')
+       {
+
+        $(".gantt-elastic__chart-scroll-container--vertical").animate({
+                scrollTop:  verticalScroll
+              },function (){ 
+                verticalScroll=verticalScroll+MaxScrollHeight;
+                VerticalCall++;
+                ForHorizental();
+              });
+       }
+       else
+       {
+          $(".gantt-elastic__chart-scroll-container--horizontal").animate({
+                scrollLeft:  scrolled
+              },function (){
+                Create();
+                scrolled = scrolled+700;
+                HorizentalCall++;
+              });       
+       }
+    }
+
+   function Reset()  // after Successfull genrate PDF reset it 
+   {
+     AllImage = [];       
+     scrolled=0;         
+     verticalScroll = 0; 
+
+     VerticalScrollCount   = 0;
+     HorizenatalScrollCount= 0;
+     HorizentalCall=1; 
+     VerticalCall=1; 
+
+      // for look like reprocessing
+          $("#exportButton").removeClass('hide');
+          $("#wait").addClass('hide');
+      // for look like reprocessing end
+
+   }
+</script> 
+  </body>
+</html>
